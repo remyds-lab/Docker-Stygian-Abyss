@@ -1,0 +1,29 @@
+FROM php:8.2-apache
+
+COPY Stygian-Abyss/web                       /var/www/html/stygian
+COPY Stygian-Abyss/website/index.html        /var/www/html/index.html
+COPY Stygian-Abyss/website/stygianSmall.png  /var/www/html/stygianSmall.png
+
+RUN printf '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html\n\
+    <Directory /var/www/html>\n\
+        AllowOverride All\n\
+        Options -Indexes\n\
+        Require all granted\n\
+        RewriteEngine On\n\
+        RewriteRule ^play/?$ /stygian/ [R=301,L]\n\
+    </Directory>\n\
+    <Directory /var/www/html/stygian>\n\
+        AllowOverride All\n\
+        Options -Indexes\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>\n' > /etc/apache2/sites-available/000-default.conf && \
+    a2enmod rewrite headers && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+EXPOSE 80
+CMD ["apache2-foreground"]
+
+
